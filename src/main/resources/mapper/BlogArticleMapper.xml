@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yc.blog.mapper.BlogArticleMapper" >
+  <resultMap id="BaseResultMap" type="com.yc.blog.bean.BlogArticle" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="author" property="author" jdbcType="INTEGER" />
+    <result column="authorName" property="authorName" jdbcType="VARCHAR" />
+    <result column="authorAvatar" property="authorAvatar" jdbcType="VARCHAR" />
+    <result column="classify" property="classify" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="name" property="name" jdbcType="LONGVARCHAR" />
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+    <result column="summary" property="summary" jdbcType="LONGVARCHAR" />
+    <result column="picture" property="picture" jdbcType="LONGVARCHAR" />
+
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from blog_article
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.yc.blog.bean.BlogArticle" >
+    insert into blog_article (author, classify, name, content, summary, picture)
+    values (#{author,jdbcType=INTEGER}, #{classify,jdbcType=INTEGER},
+      #{name,jdbcType=LONGVARCHAR}, #{content,jdbcType=LONGVARCHAR},
+      #{summary,jdbcType=LONGVARCHAR},#{picture,jdbcType=LONGVARCHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.yc.blog.bean.BlogArticle" >
+    update blog_article
+    set classify = #{classify,jdbcType=INTEGER},
+      name = #{name,jdbcType=LONGVARCHAR},
+      content = #{content,jdbcType=LONGVARCHAR},
+      summary = #{summary,jdbcType=LONGVARCHAR},
+      picture=#{picture,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateToDefaultClassify" >
+    update blog_article
+    set classify = 1
+    where id in
+    <foreach open="(" separator="," close=")" item="id" collection="ids">#{id,jdbcType=INTEGER}</foreach>
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select blog_article.id, blog_article.author, blog_user.name authorName, blog_article.classify, blog_classify.name classifyName, blog_article.status, blog_article.create_time, blog_article.update_time, blog_article.name, blog_article.content, blog_article.summary,blog_user.avatar authorAvatar,blog_article.picture
+    from blog_article, blog_user, blog_classify
+    where blog_article.id = #{id,jdbcType=INTEGER}
+    and blog_user.uid = blog_article.author
+    and blog_classify.id = blog_article.classify
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select blog_article.id, blog_article.author, blog_user.name authorName, blog_article.classify, blog_classify.name classifyName, blog_article.status, blog_article.create_time, blog_article.update_time, blog_article.name, blog_article.content, blog_article.summary,blog_article.picture
+    from blog_article, blog_user, blog_classify
+    where blog_user.uid = blog_article.author
+    and blog_classify.id = blog_article.classify
+    order by blog_article.update_time desc
+    limit #{a,jdbcType=INTEGER},#{b,jdbcType=INTEGER}
+  </select>
+  <select id="selectByClassify" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select blog_article.id, blog_article.author, blog_user.name authorName, blog_article.classify, blog_classify.name classifyName, blog_article.status, blog_article.create_time, blog_article.update_time, blog_article.name, blog_article.content, blog_article.summary,blog_user.avatar authorAvatar,blog_article.picture
+    from blog_article, blog_user, blog_classify
+    where blog_article.classify = #{classify,jdbcType=INTEGER}
+    and blog_user.uid = blog_article.author
+    and blog_classify.id = blog_article.classify
+    order by blog_article.update_time desc
+    limit #{a,jdbcType=INTEGER},#{b,jdbcType=INTEGER}
+  </select>
+  <select id="selectAllByClassify" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select blog_article.id, blog_article.author, blog_user.name authorName, blog_article.classify, blog_classify.name classifyName, blog_article.status, blog_article.create_time, blog_article.update_time, blog_article.name, blog_article.content, blog_article.summary,blog_article.picture
+    from blog_article, blog_user, blog_classify
+    where blog_article.classify = #{classify,jdbcType=INTEGER}
+    and blog_user.uid = blog_article.author
+    and blog_classify.id = blog_article.classify
+    order by blog_article.update_time desc
+  </select>
+  <select id="selectByUser" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select blog_article.id, blog_article.author, blog_user.name authorName, blog_article.classify, blog_classify.name classifyName, blog_article.status, blog_article.create_time, blog_article.update_time, blog_article.name, blog_article.content, blog_article.summary,blog_user.avatar authorAvatar,blog_article.picture
+    from blog_article, blog_user, blog_classify
+    where blog_article.author = #{user,jdbcType=INTEGER}
+    and blog_user.uid = blog_article.author
+    and blog_classify.id = blog_article.classify
+    order by blog_article.update_time desc
+    limit #{a,jdbcType=INTEGER},#{b,jdbcType=INTEGER}
+  </select>
+  <select id="search" resultMap="BaseResultMap" >
+    select blog_article.id, blog_article.author, blog_user.name authorName, blog_article.classify, blog_classify.name classifyName, blog_article.status, blog_article.create_time, blog_article.update_time, blog_article.name, blog_article.content, blog_article.summary,blog_article.picture
+    from blog_article, blog_user, blog_classify
+    where (blog_article.name like CONCAT('%',#{text,jdbcType=VARCHAR},'%')
+    or blog_article.content like CONCAT('%',#{text,jdbcType=VARCHAR},'%'))
+    and blog_user.uid = blog_article.author
+    and blog_classify.id = blog_article.classify
+    order by blog_article.update_time desc
+    limit #{a,jdbcType=INTEGER},#{b,jdbcType=INTEGER}
+  </select>
+</mapper>

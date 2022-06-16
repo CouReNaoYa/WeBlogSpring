@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.yc.blog.mapper.BlogClassifyMapper" >
+  <resultMap id="BaseResultMap" type="com.yc.blog.bean.BlogClassify" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="info" property="info" jdbcType="LONGVARCHAR" />
+    <result column="count" property="count" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from blog_classify
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.yc.blog.bean.BlogClassify" >
+    insert into blog_classify (name, info)
+    values (#{name,jdbcType=VARCHAR}, #{info,jdbcType=LONGVARCHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.yc.blog.bean.BlogClassify" >
+    update blog_classify
+    set name = #{name,jdbcType=VARCHAR},
+        info = #{info,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select id, name, info, create_time, update_time, IFNULL(count, 0) count
+    from blog_classify
+    left join (
+      select classify, count(*) count
+      from blog_article
+      group by classify
+    ) tmp on tmp.classify = blog_classify.id
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, name, info, create_time, update_time, IFNULL(count, 0) count
+    from blog_classify
+    left join (
+      select classify, count(*) count
+      from blog_article
+      group by classify
+    ) tmp on tmp.classify = blog_classify.id
+    order by blog_classify.update_time desc
+  </select>
+</mapper>
